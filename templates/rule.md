@@ -1,6 +1,8 @@
 ---
 description: {{description}}
-# Optional: only load this rule when Claude works on matching files.
+# Optional: the skill that holds this rule's examples and details.
+# skill: {{name}}
+# Optional: only load this rule when the agent works on matching files.
 # paths:
 #   - "src/**/*.ts"
 ---

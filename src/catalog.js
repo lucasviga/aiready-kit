@@ -71,6 +71,7 @@ export function loadRules() {
         name: meta.name || id,
         description: meta.description || '',
         paths: Array.isArray(meta.paths) ? meta.paths : meta.paths ? [meta.paths] : [],
+        skill: typeof meta.skill === 'string' ? meta.skill : null,
         source,
       };
     })
@@ -79,6 +80,12 @@ export function loadRules() {
 
 export function loadAll() {
   return { skills: loadSkills(), rules: loadRules() };
+}
+
+/** Rules declare `skill: <id>` in frontmatter; return the counterpart of an item, if any. */
+export function pairOf(item, { skills, rules } = loadAll()) {
+  if (item.kind === 'rule') return skills.find((s) => s.id === item.skill) || null;
+  return rules.find((r) => r.skill === item.id) || null;
 }
 
 export function findItem(kind, id) {

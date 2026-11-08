@@ -5,15 +5,18 @@ description: {{description}}
 
 # {{name}}
 
-## When to use
-
-Describe the situations where Claude should reach for this skill.
-
-## Instructions
+## Workflow
 
 1. Step one.
 2. Step two.
 
-## Examples
+## Checklist
 
-Show an example input and the expected result.
+- [ ] Item to verify before finishing
+
+## Resources (load only when needed)
+
+| When you need… | Read |
+|----------------|------|
+| Bad → good examples | `references/examples.md` |
+| Extended practices | `references/best-practices.md` |

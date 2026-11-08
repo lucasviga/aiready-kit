@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
-import { loadAll } from './catalog.js';
+import { loadAll, pairOf } from './catalog.js';
+import { syncAgentsMd } from './agents.js';
 import { install, uninstall, status, targetBase, canSymlink, scaffold, NAME_RE } from './install.js';
 
 function bail(value) {
@@ -47,6 +48,20 @@ async function installFlow() {
     }),
   );
 
+  const catalog = { skills, rules };
+  const missingPairs = picked
+    .map((i) => pairOf(i, catalog))
+    .filter((pair) => pair && !picked.includes(pair) && status(pair, scope) === 'missing');
+  if (missingPairs.length) {
+    const addPairs = bail(
+      await p.confirm({
+        message: `Rules and skills work in pairs. Also install ${missingPairs.map((i) => `${i.kind} ${i.id}`).join(', ')}?`,
+        initialValue: true,
+      }),
+    );
+    if (addPairs) picked.push(...missingPairs);
+  }
+
   let mode = 'copy';
   if (canSymlink()) {
     mode = bail(
@@ -73,6 +88,7 @@ async function installFlow() {
 
   const results = picked.map((item) => install(item, { scope, mode, force }));
   report(results);
+  if (scope === 'project') reportAgents(syncAgentsMd());
 }
 
 async function uninstallFlow() {
@@ -91,6 +107,7 @@ async function uninstallFlow() {
   const ok = bail(await p.confirm({ message: `Remove ${picked.length} item(s)?`, initialValue: false }));
   if (!ok) return p.log.info('Nothing removed.');
   report(picked.map((item) => uninstall(item, { scope })));
+  if (scope === 'project') reportAgents(syncAgentsMd());
 }
 
 function statusFlow() {
@@ -140,6 +157,11 @@ async function createFlow() {
   }
 }
 
+function reportAgents({ file, result }) {
+  if (result === 'unchanged') return;
+  p.log.info(`AGENTS.md ${result} ${pc.dim(file)} — rules and skills are linked for any AI agent.`);
+}
+
 function report(results) {
   for (const r of results) {
     const line = `${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)}`;
@@ -150,7 +172,7 @@ function report(results) {
 
 export async function runWizard() {
   console.clear();
-  p.intro(pc.bgMagenta(pc.black(' claude-kit ')) + pc.dim('  skills & rules for Claude Code'));
+  p.intro(pc.bgMagenta(pc.black(' aiready-kit ')) + pc.dim('  skills & rules for AI coding agents'));
 
   while (true) {
     const action = bail(

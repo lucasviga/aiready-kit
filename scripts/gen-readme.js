@@ -4,40 +4,60 @@
 // With --check, exits 1 if the README is out of date (useful in CI).
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, loadAll } from '../src/catalog.js';
+import { ROOT, loadAll, pairOf } from '../src/catalog.js';
 
-const REPO = 'github:lucasviga/claude-kit';
-const RAW = 'https://raw.githubusercontent.com/lucasviga/claude-kit/main';
+const REPO = 'github:lucasviga/aiready-kit';
+const GIT_URL = 'https://github.com/lucasviga/aiready-kit.git';
+const RAW = 'https://raw.githubusercontent.com/lucasviga/aiready-kit/main';
 const START = '<!-- CATALOG:START -->';
 const END = '<!-- CATALOG:END -->';
 
-function skillSection(s) {
-  return `### \`${s.id}\`
+const anchor = (item) => `${item.id}-${item.kind}`;
+const link = (item) => `[\`${item.id}\`](#${anchor(item)})`;
+
+function listFiles(dir) {
+  return fs
+    .readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && !e.name.startsWith('.'))
+    .map((e) => path.relative(dir, path.join(e.parentPath ?? e.path, e.name)).split(path.sep).join('/'))
+    .sort((a, b) => (a === 'SKILL.md' ? -1 : b === 'SKILL.md' ? 1 : a.localeCompare(b)));
+}
+
+function pairLine(item, catalog) {
+  const pair = pairOf(item, catalog);
+  return pair ? `\n**Pairs with:** ${pair.kind} ${link(pair)} — install both for best results.\n` : '';
+}
+
+function skillSection(s, catalog) {
+  const files = listFiles(s.source).map((f) => `- [\`${f}\`](skills/${s.id}/${f})`).join('\n');
+  return `### \`${s.id}\` skill
 
 ${s.description}
+${pairLine(s, catalog)}
+**Files** (only \`SKILL.md\` is loaded when the skill triggers; the rest are read on demand):
 
-**Source:** [\`skills/${s.id}/SKILL.md\`](skills/${s.id}/SKILL.md)
+${files}
 
 <details>
 <summary>Install guide</summary>
 
-**Wizard:** run \`npx ${REPO}\` → *Install skills / rules* → select **${s.id}**.
+**Wizard:** run \`npx ${REPO}\` → *Install skills / rules* → select **skill ${s.id}**.
 
 **One command:**
 
 \`\`\`bash
 npx ${REPO} install skill ${s.id}             # global (~/.claude/skills)
-npx ${REPO} install skill ${s.id} --project   # this project (./.claude/skills)
+npx ${REPO} install skill ${s.id} --project   # this project (./.claude/skills + AGENTS.md)
 \`\`\`
 
-**Manual:**
+**Manual** (copies the whole folder, including \`references/\` and \`assets/\`):
 
 \`\`\`bash
-mkdir -p ~/.claude/skills/${s.id}
-curl -fsSL ${RAW}/skills/${s.id}/SKILL.md -o ~/.claude/skills/${s.id}/SKILL.md
+git clone --depth 1 ${GIT_URL} /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/${s.id} ~/.claude/skills/
 \`\`\`
 
-**Use it:** Claude picks it up on its own when the task matches the description, or you can call it with \`/${s.name}\`.
+**Use it:** the agent loads it when the task matches the description, or call it with \`/${s.name}\` in Claude Code.
 
 **Uninstall:** \`npx ${REPO} uninstall skill ${s.id}\` or \`rm -rf ~/.claude/skills/${s.id}\`
 
@@ -45,26 +65,28 @@ curl -fsSL ${RAW}/skills/${s.id}/SKILL.md -o ~/.claude/skills/${s.id}/SKILL.md
 `;
 }
 
-function ruleSection(r) {
-  const scoped = r.paths.length
-    ? `\n**Applies to:** ${r.paths.map((p) => `\`${p}\``).join(', ')}\n`
-    : '\n**Applies to:** every session (always loaded)\n';
-  return `### \`${r.id}\`
+function ruleSection(r, catalog) {
+  const scope = r.paths.length
+    ? `**Loads for:** ${r.paths.map((p) => `\`${p}\``).join(', ')}`
+    : '**Loads for:** every session (always on)';
+  return `### \`${r.id}\` rule
 
 ${r.description}
-${scoped}
+
+${scope}
+${pairLine(r, catalog)}
 **Source:** [\`rules/${r.id}.md\`](rules/${r.id}.md)
 
 <details>
 <summary>Install guide</summary>
 
-**Wizard:** run \`npx ${REPO}\` → *Install skills / rules* → select **${r.id}**.
+**Wizard:** run \`npx ${REPO}\` → *Install skills / rules* → select **rule ${r.id}**.
 
 **One command:**
 
 \`\`\`bash
 npx ${REPO} install rule ${r.id}             # global (~/.claude/rules)
-npx ${REPO} install rule ${r.id} --project   # this project (./.claude/rules)
+npx ${REPO} install rule ${r.id} --project   # this project (./.claude/rules + AGENTS.md)
 \`\`\`
 
 **Manual:**
@@ -74,7 +96,7 @@ mkdir -p ~/.claude/rules
 curl -fsSL ${RAW}/rules/${r.id}.md -o ~/.claude/rules/${r.id}.md
 \`\`\`
 
-**Use it:** Claude Code loads it into memory at the start of every session. Check with \`/memory\`.
+**Use it:** Claude Code loads rules from \`.claude/rules\` automatically (check with \`/memory\`). Other agents (Codex, Cursor, Copilot…) find it through the project's \`AGENTS.md\`.
 
 **Uninstall:** \`npx ${REPO} uninstall rule ${r.id}\` or \`rm ~/.claude/rules/${r.id}.md\`
 
@@ -82,26 +104,31 @@ curl -fsSL ${RAW}/rules/${r.id}.md -o ~/.claude/rules/${r.id}.md
 `;
 }
 
+function table(list) {
+  if (!list.length) return '_None yet._';
+  const rows = list.map((i) => `| ${link(i)} | ${i.description.replace(/\|/g, '\\|')} |`);
+  return ['| Name | Description |', '|------|-------------|', ...rows].join('\n');
+}
+
 function build() {
-  const { skills, rules } = loadAll();
-  const table = (list, folder) =>
-    list.length
-      ? ['| Name | Description |', '|------|-------------|', ...list.map((i) => `| [\`${i.id}\`](#${i.id}) | ${i.description.replace(/\|/g, '\\|')} |`)].join('\n')
-      : '_None yet._';
+  const catalog = loadAll();
+  const { skills, rules } = catalog;
   return [
     START,
     '<!-- Generated by `npm run docs` — edit the skills/rules, not this section. -->',
     '',
-    `## Skills (${skills.length})`,
+    `### Rules (${rules.length})`,
     '',
-    table(skills, 'skills'),
+    table(rules),
     '',
-    ...skills.map(skillSection),
-    `## Rules (${rules.length})`,
+    `### Skills (${skills.length})`,
     '',
-    table(rules, 'rules'),
+    table(skills),
     '',
-    ...rules.map(ruleSection),
+    '## Install guides',
+    '',
+    ...rules.map((r) => ruleSection(r, catalog)),
+    ...skills.map((s) => skillSection(s, catalog)),
     END,
   ].join('\n');
 }
@@ -113,7 +140,7 @@ if (!pattern.test(readme)) {
   console.error(`README.md is missing the ${START} / ${END} markers.`);
   process.exit(1);
 }
-const next = readme.replace(pattern, build());
+const next = readme.replace(pattern, () => build());
 
 if (process.argv.includes('--check')) {
   if (next !== readme) {

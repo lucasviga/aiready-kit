@@ -2,22 +2,25 @@
 import pc from 'picocolors';
 import { loadAll, findItem } from '../src/catalog.js';
 import { install, uninstall, status, scaffold, canSymlink } from '../src/install.js';
+import { syncAgentsMd } from '../src/agents.js';
 
 const HELP = `
-${pc.bold('claude-kit')} — install my Claude Code skills & rules
+${pc.bold('aiready-kit')} — install my AI coding skills & rules
 
 ${pc.bold('Usage')}
-  claude-kit                                   open the interactive wizard
-  claude-kit list                              list everything + install status
-  claude-kit install <skill|rule> <name...>    install items
-  claude-kit install all                       install every skill and rule
-  claude-kit uninstall <skill|rule> <name...>  remove items
-  claude-kit new <skill|rule> <name>           scaffold a new item in this repo
+  aiready-kit                                   open the interactive wizard
+  aiready-kit list                              list everything + install status
+  aiready-kit install <skill|rule> <name...>    install items
+  aiready-kit install all                       install every skill and rule
+  aiready-kit uninstall <skill|rule> <name...>  remove items
+  aiready-kit new <skill|rule> <name>           scaffold a new item in this repo
+  aiready-kit agents                             regenerate ./AGENTS.md from ./.claude
 
 ${pc.bold('Options')}
   --project    target ./.claude instead of ~/.claude
   --link       symlink instead of copy (only from a git clone)
   --force      overwrite existing files
+  --no-agents  don't update ./AGENTS.md after a --project install/uninstall
   -h, --help   show this help
 `;
 
@@ -37,8 +40,14 @@ function resolveItems(kind, names) {
     return [...skills, ...rules];
   }
   if (kind !== 'skill' && kind !== 'rule') fail('Kind must be "skill", "rule" or "all".');
-  if (!names.length) fail(`Give at least one ${kind} name. Run "claude-kit list" to see them.`);
+  if (!names.length) fail(`Give at least one ${kind} name. Run "aiready-kit list" to see them.`);
   return names.map((n) => findItem(kind, n) || fail(`Unknown ${kind}: ${n}`));
+}
+
+function syncAgents() {
+  if (scope !== 'project' || flags.has('--no-agents')) return;
+  const { file, result } = syncAgentsMd();
+  if (result !== 'unchanged') console.log(`${pc.green('✔')} AGENTS.md ${result} → ${pc.dim(file)}`);
 }
 
 function print(r) {
@@ -78,13 +87,19 @@ async function main() {
         mode = 'link';
       }
       const force = flags.has('--force');
-      return resolveItems(kind, names).forEach((item) => print(install(item, { scope, mode, force })));
+      resolveItems(kind, names).forEach((item) => print(install(item, { scope, mode, force })));
+      return syncAgents();
     }
     case 'uninstall':
     case 'rm':
-      return resolveItems(kind, names).forEach((item) => print(uninstall(item, { scope })));
+      resolveItems(kind, names).forEach((item) => print(uninstall(item, { scope })));
+      return syncAgents();
+    case 'agents': {
+      const { file, result } = syncAgentsMd();
+      return console.log(`${pc.green('✔')} AGENTS.md ${result} → ${pc.dim(file)}`);
+    }
     case 'new': {
-      if (kind !== 'skill' && kind !== 'rule') fail('Usage: claude-kit new <skill|rule> <name>');
+      if (kind !== 'skill' && kind !== 'rule') fail('Usage: aiready-kit new <skill|rule> <name>');
       if (!names[0]) fail('Give the new item a name.');
       try {
         console.log(`${pc.green('✔')} Created ${scaffold(kind, names[0])}`);

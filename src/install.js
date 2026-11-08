@@ -67,17 +67,19 @@ export function uninstall(item, { scope = 'global', cwd } = {}) {
 export const NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** Scaffold a new skill or rule inside this repo from templates/. */
-export function scaffold(kind, id, description = 'TODO: describe when this should be used.') {
+export function scaffold(kind, id, description = 'Describe what this does and when to use it.') {
   if (!NAME_RE.test(id)) throw new Error('Name must be kebab-case (e.g. my-skill).');
   const fill = (text) =>
-    text.replaceAll('{{name}}', id).replaceAll('{{description}}', description.replace(/\n/g, ' '));
+    text.replaceAll('{{name}}', id).replaceAll('{{description}}', JSON.stringify(description.replace(/\n/g, ' ').trim()));
 
   if (kind === 'skill') {
     const dest = path.join(SKILLS_DIR, id);
     if (fs.existsSync(dest)) throw new Error(`Skill "${id}" already exists.`);
-    fs.mkdirSync(dest, { recursive: true });
-    const tpl = fs.readFileSync(path.join(TEMPLATES_DIR, 'skill', 'SKILL.md'), 'utf8');
-    fs.writeFileSync(path.join(dest, 'SKILL.md'), fill(tpl));
+    fs.cpSync(path.join(TEMPLATES_DIR, 'skill'), dest, { recursive: true });
+    for (const file of fs.readdirSync(dest, { recursive: true })) {
+      const full = path.join(dest, file);
+      if (file.endsWith('.md')) fs.writeFileSync(full, fill(fs.readFileSync(full, 'utf8')));
+    }
     return path.join(dest, 'SKILL.md');
   }
   const dest = path.join(RULES_DIR, `${id}.md`);
