@@ -1,9 +1,24 @@
 ---
 name: tests
-description: Write and review automated tests with Vitest (unit/integration) and Playwright (E2E) following FIRST, AAA/Given-When-Then, the test pyramid and an 80% coverage target prioritized by business criticality. Use when writing code that needs tests, adding or fixing tests, setting up a test suite, raising coverage, or reviewing test quality.
+description: Write and review automated tests with Vitest and Playwright — unit/integration/E2E following FIRST, AAA/Given-When-Then, the test pyramid and an 80% coverage target prioritized by business criticality. Use when writing code that needs tests, adding or fixing tests, setting up a test suite, raising coverage, or reviewing test quality.
 ---
 
 # Tests
+
+## Rules
+
+- All code is covered by automated tests, with **at least 80% coverage**. Prioritize the most critical flows first (e.g. the checkout journey matters more than registering a product category).
+- Follow **FIRST**:
+  - **Fast** — use test doubles (stubs) to replace slow or external dependencies (network, database, file system).
+  - **Independent** — no test depends on another test's state or execution order.
+  - **Repeatable** — same result on every run. Mock dates, random values and API responses that change per request.
+  - **Self-validating** — strong assertions on behavior and outcomes, not only on "it returned something". A test must fail when the behavior breaks.
+  - *Timely* is optional: write tests in whatever order makes the work most efficient.
+- Structure every test as **Arrange / Act / Assert** (or Given / When / Then).
+- Follow the **test pyramid**: many unit tests, fewer integration tests, few E2E tests.
+- Use **Vitest** for unit and integration tests and **Playwright** for E2E.
+- One behavior per test, driven by requirements. Don't mix different behaviors in one test.
+- Frontend and backend each have comprehensive tests. E2E tests live **outside** both projects in a root-level `e2e/` folder.
 
 ## Workflow
 

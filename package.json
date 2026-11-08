@@ -15,8 +15,8 @@
   ],
   "scripts": {
     "start": "node bin/cli.js",
-    "docs": "node scripts/gen-readme.js",
-    "check": "node scripts/gen-readme.js --check"
+    "docs": "node scripts/gen-docs.js",
+    "check": "node scripts/gen-docs.js --check"
   },
   "engines": {
     "node": ">=18"

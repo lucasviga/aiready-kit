@@ -1,6 +1,6 @@
 ---
 name: code-standards
-description: Apply and review code standards — file and function size limits, guard clauses, parameter objects, constants for magic values, variable placement, comments and secrets. Use when writing, refactoring or reviewing TypeScript/JavaScript code, or when the user asks for clean code, a code review or a refactor.
+description: Apply and review clean code standards — file and function size limits, guard clauses, parameter objects, constants for magic values, variable placement, comments and secrets. Use when writing, refactoring or reviewing TypeScript/JavaScript code, or when the user asks for clean code, a code review or a refactor.
 ---
 
 # Code standards

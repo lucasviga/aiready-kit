@@ -2,7 +2,7 @@
 import pc from 'picocolors';
 import { loadAll, findItem } from '../src/catalog.js';
 import { install, uninstall, status, scaffold, canSymlink } from '../src/install.js';
-import { syncAgentsMd } from '../src/agents.js';
+import { syncAgentsMd, CLAUDE_HINTS } from '../src/agents.js';
 
 const HELP = `
 ${pc.bold('aiready-kit')} — install my AI coding skills & rules
@@ -46,8 +46,12 @@ function resolveItems(kind, names) {
 
 function syncAgents() {
   if (scope !== 'project' || flags.has('--no-agents')) return;
-  const { file, result } = syncAgentsMd();
-  if (result !== 'unchanged') console.log(`${pc.green('✔')} AGENTS.md ${result} → ${pc.dim(file)}`);
+  printAgents(syncAgentsMd(), false);
+}
+
+function printAgents({ file, result, claude }, always = true) {
+  if (always || result !== 'unchanged') console.log(`${pc.green('✔')} AGENTS.md ${result} → ${pc.dim(file)}`);
+  if (CLAUDE_HINTS[claude]) console.log(`${claude === 'missing-import' ? pc.yellow('•') : pc.green('✔')} ${CLAUDE_HINTS[claude]}`);
 }
 
 function print(r) {
@@ -95,8 +99,7 @@ async function main() {
       resolveItems(kind, names).forEach((item) => print(uninstall(item, { scope })));
       return syncAgents();
     case 'agents': {
-      const { file, result } = syncAgentsMd();
-      return console.log(`${pc.green('✔')} AGENTS.md ${result} → ${pc.dim(file)}`);
+      return printAgents(syncAgentsMd());
     }
     case 'new': {
       if (kind !== 'skill' && kind !== 'rule') fail('Usage: aiready-kit new <skill|rule> <name>');

@@ -16,7 +16,7 @@ describe('calculateTotal', () => {
 });
 ```
 
-Arrange = `cart` and `coupon`, Act = `calculateTotal`, Assert = `expect`. Per the code-standards rule there are no blank lines inside the function. The order of the three steps makes the structure clear.
+Arrange = `cart` and `coupon`, Act = `calculateTotal`, Assert = `expect`. Per the code-standards skill there are no blank lines inside functions. The order of the three steps makes the structure clear.
 
 ## Fast — stub slow dependencies
 

@@ -1,7 +1,7 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
 import { loadAll, pairOf } from './catalog.js';
-import { syncAgentsMd } from './agents.js';
+import { syncAgentsMd, CLAUDE_HINTS } from './agents.js';
 import { install, uninstall, status, targetBase, canSymlink, scaffold, NAME_RE } from './install.js';
 
 function bail(value) {
@@ -157,9 +157,9 @@ async function createFlow() {
   }
 }
 
-function reportAgents({ file, result }) {
-  if (result === 'unchanged') return;
-  p.log.info(`AGENTS.md ${result} ${pc.dim(file)} — rules and skills are linked for any AI agent.`);
+function reportAgents({ file, result, claude }) {
+  if (result !== 'unchanged') p.log.info(`AGENTS.md ${result} ${pc.dim(file)} — rules and skills are linked for any AI agent.`);
+  if (CLAUDE_HINTS[claude]) p.log.info(CLAUDE_HINTS[claude]);
 }
 
 function report(results) {

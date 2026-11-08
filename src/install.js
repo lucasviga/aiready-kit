@@ -61,7 +61,13 @@ export function uninstall(item, { scope = 'global', cwd } = {}) {
   const dest = targetPath(item, scope, cwd);
   if (status(item, scope, cwd) === 'missing') return { item, dest, result: 'not installed' };
   fs.rmSync(dest, { recursive: true, force: true });
+  removeIfEmpty(path.dirname(dest));
+  removeIfEmpty(targetBase(scope, cwd));
   return { item, dest, result: 'removed' };
+}
+
+function removeIfEmpty(dir) {
+  if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
 }
 
 export const NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;

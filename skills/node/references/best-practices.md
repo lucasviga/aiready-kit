@@ -10,7 +10,7 @@
 
 5. **Structured logs with correlation.** Log JSON in production with a request id (from `AsyncLocalStorage`) on every line, at the right level, and never log secrets or personal data.
 
-6. **Layered architecture.** Routes → controllers (HTTP) → services (business rules) → repositories (data). Business logic never touches `req`/`res`.
+6. **Layered architecture.** `routes/` (HTTP) → `services/` (business rules) → `data/` (queries, external APIs). Business logic never touches `req`/`res`, and routes never run queries.
 
 7. **Timeouts everywhere.** Give every outbound call a timeout (`fetch(url, { signal: AbortSignal.timeout(5000) })`) and every DB pool limits. A slow dependency must not hang the server.
 

@@ -5,6 +5,18 @@ description: Build and review React + TypeScript frontends — small functional 
 
 # React
 
+## Rules
+
+- Write small, reusable, **functional** components of at most **30 lines**.
+- Don't pass props with the spread operator (`<Button {...props} />`). Pass each prop explicitly.
+- Avoid unnecessary `useEffect`. Derive values during render and handle user actions in event handlers.
+- Use `useMemo` for heavy calculations and to avoid needless re-renders.
+- Keep backend access out of components. API calls live in `services/`, and components consume them through hooks.
+- Put component logic in custom hooks whose names start with `use` (`useCart`, `useCheckout`).
+- Make components accessible: semantic HTML first, then `aria-*`, labels and keyboard support.
+- Style with **Tailwind CSS**.
+- Folder layout: follow the `folder-structure` rule.
+
 ## Workflow
 
 1. **Locate the layer.** Is it a screen (`views/`), a reusable piece of UI (`components/`), logic or state (`hooks/`), backend access (`services/`) or a shared type (`types/`)?
