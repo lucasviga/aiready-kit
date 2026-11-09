@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import path from 'node:path';
 import pc from 'picocolors';
 import { loadAll, findItem } from '../src/catalog.js';
 import { install, uninstall, status, scaffold, canSymlink } from '../src/install.js';
@@ -17,7 +18,7 @@ ${pc.bold('Usage')}
   aiready-kit agents                             regenerate ./AGENTS.md from ./.claude
 
 ${pc.bold('Options')}
-  --project    target ./.claude instead of ~/.claude
+  --project    target ./.claude and ./.agents instead of ~/.claude
   --link       symlink instead of copy (only from a git clone)
   --force      overwrite existing files
   --no-agents  don't update ./AGENTS.md after a --project install/uninstall
@@ -57,7 +58,8 @@ function printAgents({ file, result, claude }, always = true) {
 function print(r) {
   const ok = !['skipped', 'not installed'].includes(r.result);
   const icon = ok ? pc.green('✔') : pc.yellow('•');
-  console.log(`${icon} ${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)} (${r.reason || r.result})`);
+  const extra = r.dests?.length > 1 ? pc.dim(` + ${r.dests.slice(1).map((d) => path.relative(process.cwd(), d)).join(', ')}`) : '';
+  console.log(`${icon} ${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)}${extra} (${r.reason || r.result})`);
 }
 
 async function main() {

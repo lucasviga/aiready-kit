@@ -24,7 +24,7 @@ npx github:lucasviga/aiready-kit
 └
 ```
 
-Pick what you want, then choose **This project** or **Global**. That's it.
+Pick what you want, then choose **This project** (`.claude/` + `.agents/` + `AGENTS.md`) or **Global** (`~/.claude/`). That's it.
 
 ## What's inside
 

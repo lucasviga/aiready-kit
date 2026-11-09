@@ -4,19 +4,31 @@ import path from 'node:path';
 import { ROOT, TEMPLATES_DIR, SKILLS_DIR, RULES_DIR } from './catalog.js';
 
 /**
- * Where Claude Code looks for things:
- *   global  -> ~/.claude/skills/<name>/SKILL.md   and ~/.claude/rules/<name>.md
- *   project -> ./.claude/skills/<name>/SKILL.md   and ./.claude/rules/<name>.md
+ * Where agents look for things:
+ *   global  -> ~/.claude/{skills/<name>/, rules/<name>.md}
+ *   project -> ./.claude/{skills/<name>/, rules/<name>.md}   (Claude Code)
+ *              ./.agents/{skills/<name>/, rules/<name>.md}   (AGENTS.md-based workflows)
+ * The first base is the primary one, used for status and listings.
  */
-export function targetBase(scope, cwd = process.cwd()) {
-  return scope === 'project' ? path.join(cwd, '.claude') : path.join(os.homedir(), '.claude');
+export function targetBases(scope, cwd = process.cwd()) {
+  if (scope !== 'project') return [path.join(os.homedir(), '.claude')];
+  return [path.join(cwd, '.claude'), path.join(cwd, '.agents')];
+}
+
+export function targetBase(scope, cwd) {
+  return targetBases(scope, cwd)[0];
+}
+
+function pathIn(base, item) {
+  return item.kind === 'skill' ? path.join(base, 'skills', item.id) : path.join(base, 'rules', `${item.id}.md`);
+}
+
+export function targetPaths(item, scope, cwd) {
+  return targetBases(scope, cwd).map((base) => pathIn(base, item));
 }
 
 export function targetPath(item, scope, cwd) {
-  const base = targetBase(scope, cwd);
-  return item.kind === 'skill'
-    ? path.join(base, 'skills', item.id)
-    : path.join(base, 'rules', `${item.id}.md`);
+  return targetPaths(item, scope, cwd)[0];
 }
 
 /** Symlinks only make sense when running from a real clone (not an npx cache). */
@@ -24,8 +36,7 @@ export function canSymlink() {
   return fs.existsSync(path.join(ROOT, '.git'));
 }
 
-export function status(item, scope, cwd) {
-  const dest = targetPath(item, scope, cwd);
+function statusAt(item, dest) {
   let stat;
   try {
     stat = fs.lstatSync(dest);
@@ -38,32 +49,38 @@ export function status(item, scope, cwd) {
   return 'installed';
 }
 
-export function install(item, { scope = 'global', mode = 'copy', force = false, cwd } = {}) {
-  const dest = targetPath(item, scope, cwd);
-  const current = status(item, scope, cwd);
-  if (current !== 'missing' && !force) {
-    return { item, dest, result: 'skipped', reason: `already ${current} (use --force to overwrite)` };
-  }
-  if (current !== 'missing') fs.rmSync(dest, { recursive: true, force: true });
+export function status(item, scope, cwd) {
+  return statusAt(item, targetPath(item, scope, cwd));
+}
 
+function place(item, dest, mode) {
+  fs.rmSync(dest, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(dest), { recursive: true });
-  if (mode === 'link') {
-    fs.symlinkSync(item.source, dest, item.kind === 'skill' ? 'dir' : 'file');
-  } else if (item.kind === 'skill') {
-    fs.cpSync(item.source, dest, { recursive: true });
-  } else {
-    fs.copyFileSync(item.source, dest);
+  if (mode === 'link') return fs.symlinkSync(item.source, dest, item.kind === 'skill' ? 'dir' : 'file');
+  if (item.kind === 'skill') return fs.cpSync(item.source, dest, { recursive: true });
+  return fs.copyFileSync(item.source, dest);
+}
+
+export function install(item, { scope = 'global', mode = 'copy', force = false, cwd } = {}) {
+  const dests = targetPaths(item, scope, cwd);
+  const current = dests.map((dest) => statusAt(item, dest)).find((s) => s !== 'missing');
+  if (current && !force) {
+    return { item, dest: dests[0], dests, result: 'skipped', reason: `already ${current} (use --force to overwrite)` };
   }
-  return { item, dest, result: mode === 'link' ? 'linked' : 'copied' };
+  for (const dest of dests) place(item, dest, mode);
+  return { item, dest: dests[0], dests, result: mode === 'link' ? 'linked' : 'copied' };
 }
 
 export function uninstall(item, { scope = 'global', cwd } = {}) {
-  const dest = targetPath(item, scope, cwd);
-  if (status(item, scope, cwd) === 'missing') return { item, dest, result: 'not installed' };
-  fs.rmSync(dest, { recursive: true, force: true });
-  removeIfEmpty(path.dirname(dest));
-  removeIfEmpty(targetBase(scope, cwd));
-  return { item, dest, result: 'removed' };
+  const dests = targetPaths(item, scope, cwd);
+  const present = dests.filter((dest) => statusAt(item, dest) !== 'missing');
+  if (!present.length) return { item, dest: dests[0], dests, result: 'not installed' };
+  for (const dest of present) {
+    fs.rmSync(dest, { recursive: true, force: true });
+    removeIfEmpty(path.dirname(dest));
+    removeIfEmpty(path.dirname(path.dirname(dest)));
+  }
+  return { item, dest: dests[0], dests, result: 'removed' };
 }
 
 function removeIfEmpty(dir) {

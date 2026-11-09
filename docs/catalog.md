@@ -23,7 +23,7 @@ Keep AGENTS.md and CLAUDE.md as the project's map — folders, tech stack, ports
 
 ```bash
 npx github:lucasviga/aiready-kit install rule agents-md             # global (~/.claude/rules)
-npx github:lucasviga/aiready-kit install rule agents-md --project   # this project (./.claude/rules + AGENTS.md)
+npx github:lucasviga/aiready-kit install rule agents-md --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual:**
@@ -33,7 +33,7 @@ mkdir -p ~/.claude/rules
 curl -fsSL https://raw.githubusercontent.com/lucasviga/aiready-kit/main/rules/agents-md.md -o ~/.claude/rules/agents-md.md
 ```
 
-**Use it:** Claude Code loads rules from `.claude/rules` automatically (check with `/memory`). Other agents (Codex, Cursor, Copilot…) find it through the project's `AGENTS.md`.
+**Use it:** Claude Code loads rules from `.claude/rules` automatically (check with `/memory`). In a project it is also copied to `.agents/rules`, and other agents (Codex, Cursor, Copilot…) find it through `AGENTS.md`.
 
 **Uninstall:** `npx github:lucasviga/aiready-kit uninstall rule agents-md` or `rm ~/.claude/rules/agents-md.md`
 
@@ -56,7 +56,7 @@ Standard folder structure for frontend and backend projects — components, view
 
 ```bash
 npx github:lucasviga/aiready-kit install rule folder-structure             # global (~/.claude/rules)
-npx github:lucasviga/aiready-kit install rule folder-structure --project   # this project (./.claude/rules + AGENTS.md)
+npx github:lucasviga/aiready-kit install rule folder-structure --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual:**
@@ -66,7 +66,7 @@ mkdir -p ~/.claude/rules
 curl -fsSL https://raw.githubusercontent.com/lucasviga/aiready-kit/main/rules/folder-structure.md -o ~/.claude/rules/folder-structure.md
 ```
 
-**Use it:** Claude Code loads rules from `.claude/rules` automatically (check with `/memory`). Other agents (Codex, Cursor, Copilot…) find it through the project's `AGENTS.md`.
+**Use it:** Claude Code loads rules from `.claude/rules` automatically (check with `/memory`). In a project it is also copied to `.agents/rules`, and other agents (Codex, Cursor, Copilot…) find it through `AGENTS.md`.
 
 **Uninstall:** `npx github:lucasviga/aiready-kit uninstall rule folder-structure` or `rm ~/.claude/rules/folder-structure.md`
 
@@ -94,7 +94,7 @@ Apply and review clean code standards — file and function size limits, guard c
 
 ```bash
 npx github:lucasviga/aiready-kit install skill code-standards             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill code-standards --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill code-standards --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -127,7 +127,7 @@ Write git commit messages following the Conventional Commits spec. Use when the 
 
 ```bash
 npx github:lucasviga/aiready-kit install skill conventional-commits             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill conventional-commits --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill conventional-commits --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -162,7 +162,7 @@ PRD — Product Requirements Document. Use when the user asks for a PRD or wants
 
 ```bash
 npx github:lucasviga/aiready-kit install skill create-prd             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill create-prd --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill create-prd --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -198,7 +198,7 @@ Tasks — breakdown of a feature into implementation tasks based on the existing
 
 ```bash
 npx github:lucasviga/aiready-kit install skill create-tasks             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill create-tasks --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill create-tasks --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -233,7 +233,7 @@ TechSpec — technical specification derived from an existing PRD. Use when the 
 
 ```bash
 npx github:lucasviga/aiready-kit install skill create-techspec             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill create-techspec --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill create-techspec --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -269,7 +269,7 @@ Write and review modern JavaScript/TypeScript at the language level — no var, 
 
 ```bash
 npx github:lucasviga/aiready-kit install skill javascript             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill javascript --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill javascript --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -307,7 +307,7 @@ Build and review Node.js + TypeScript backends — async/await, non-blocking eve
 
 ```bash
 npx github:lucasviga/aiready-kit install skill node             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill node --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill node --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -343,7 +343,7 @@ Build and review React + TypeScript frontends — small functional components (�
 
 ```bash
 npx github:lucasviga/aiready-kit install skill react             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill react --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill react --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -378,7 +378,7 @@ QA — validate and stabilize an implemented feature against the PRD, the TechSp
 
 ```bash
 npx github:lucasviga/aiready-kit install skill run-qa             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill run-qa --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill run-qa --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -413,7 +413,7 @@ Code review — review and stabilize the code of a feature for compliance with t
 
 ```bash
 npx github:lucasviga/aiready-kit install skill run-review             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill run-review --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill run-review --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -447,7 +447,7 @@ Task — identify and implement the next task of a feature based on the PRD, the
 
 ```bash
 npx github:lucasviga/aiready-kit install skill run-task             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill run-task --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill run-task --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):
@@ -485,7 +485,7 @@ Write and review automated tests with Vitest and Playwright — unit/integration
 
 ```bash
 npx github:lucasviga/aiready-kit install skill tests             # global (~/.claude/skills)
-npx github:lucasviga/aiready-kit install skill tests --project   # this project (./.claude/skills + AGENTS.md)
+npx github:lucasviga/aiready-kit install skill tests --project   # this project (./.claude + ./.agents + AGENTS.md)
 ```
 
 **Manual** (copies the whole folder, including `references/` and `assets/`):

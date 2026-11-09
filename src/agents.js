@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadAll } from './catalog.js';
-import { status, targetBase } from './install.js';
+import { status, targetBases } from './install.js';
 
 const START = '<!-- aiready-kit:start -->';
 const END = '<!-- aiready-kit:end -->';
@@ -46,7 +46,7 @@ function relative(cwd, target) {
 }
 
 function buildBlock(cwd, { skills, rules }) {
-  const base = targetBase('project', cwd);
+  const base = targetBases('project', cwd).at(-1);
   const ruleLines = rules.map((r) => {
     const scope = r.paths.length ? ` _(applies to ${r.paths.map((p) => `\`${p}\``).join(', ')})_` : '';
     return `- [${r.id}](${relative(cwd, path.join(base, 'rules', `${r.id}.md`))}) — ${r.description}${scope}`;

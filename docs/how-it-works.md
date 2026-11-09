@@ -9,7 +9,7 @@
 | **What** | One short Markdown file with must-follow rules | A folder: `SKILL.md` + `references/` + `assets/` |
 | **When it loads** | Every session (or only for matching files, with `paths:`) | Only when the task matches the skill's `description` |
 | **Use it for** | Things that must always hold (project map, folder layout) | Detailed how-to: examples, configs, best practices |
-| **Installed to** | `.claude/rules/<name>.md` | `.claude/skills/<name>/` |
+| **Installed to** | `.claude/rules/<name>.md` (+ `.agents/rules/` in projects) | `.claude/skills/<name>/` (+ `.agents/skills/` in projects) |
 
 ## Lazy loading
 
@@ -32,9 +32,18 @@ skills/react/
 
 | | Global | This project |
 |---|---|---|
-| Goes to | `~/.claude/` | `./.claude/` |
+| Goes to | `~/.claude/` | `./.claude/` **and** `./.agents/` |
 | Applies to | Every project on your machine (Claude Code) | This repository, for everyone who clones it |
 | Touches `AGENTS.md` / `CLAUDE.md` | No | Yes (see below) |
+
+## Why both `.claude/` and `.agents/`
+
+| Folder | Read by |
+|--------|---------|
+| `.claude/` | Claude Code, which loads `.claude/rules` and `.claude/skills` automatically |
+| `.agents/` | `AGENTS.md`-based workflows, such as the spec-driven skills (`create-techspec`, `run-task`, `run-qa`, `run-review`), which read `.agents/rules/` and `.agents/skills/` |
+
+A project install writes the same files to both, so every tool sees the same rules. Uninstall removes both. Commit both folders.
 
 ## AGENTS.md and CLAUDE.md
 
@@ -44,10 +53,10 @@ On a project install, the kit keeps a generated block in `./AGENTS.md` that link
 <!-- aiready-kit:start -->
 ## AI coding rules
 ### Rules
-- [agents-md](.claude/rules/agents-md.md) — Keep AGENTS.md … as the project's map …
-- [folder-structure](.claude/rules/folder-structure.md) — Folder structure for frontend …
+- [agents-md](.agents/rules/agents-md.md) — Keep AGENTS.md … as the project's map …
+- [folder-structure](.agents/rules/folder-structure.md) — Folder structure for frontend …
 ### Skills
-- [react](.claude/skills/react/SKILL.md) — Build and review React …
+- [react](.agents/skills/react/SKILL.md) — Build and review React …
 <!-- aiready-kit:end -->
 ```
 

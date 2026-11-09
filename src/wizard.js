@@ -1,3 +1,4 @@
+import path from 'node:path';
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
 import { loadAll, pairOf } from './catalog.js';
@@ -24,7 +25,7 @@ async function chooseScope() {
       message: 'Where should it go?',
       options: [
         { value: 'global', label: 'Global', hint: `${targetBase('global')} — every project` },
-        { value: 'project', label: 'This project', hint: `${targetBase('project')} — commit it with the repo` },
+        { value: 'project', label: 'This project', hint: './.claude + ./.agents + AGENTS.md — commit them with the repo' },
       ],
     }),
   );
@@ -164,7 +165,8 @@ function reportAgents({ file, result, claude }) {
 
 function report(results) {
   for (const r of results) {
-    const line = `${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)}`;
+    const extra = r.dests?.length > 1 ? pc.dim(` (+ ${r.dests.slice(1).map((d) => path.relative(process.cwd(), d)).join(', ')})`) : '';
+    const line = `${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)}${extra}`;
     if (r.result === 'skipped' || r.result === 'not installed') p.log.warn(`${line} (${r.reason || r.result})`);
     else p.log.success(`${line} (${r.result})`);
   }

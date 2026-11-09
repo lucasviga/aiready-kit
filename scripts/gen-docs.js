@@ -47,7 +47,7 @@ ${files}
 
 \`\`\`bash
 npx ${REPO} install skill ${s.id}             # global (~/.claude/skills)
-npx ${REPO} install skill ${s.id} --project   # this project (./.claude/skills + AGENTS.md)
+npx ${REPO} install skill ${s.id} --project   # this project (./.claude + ./.agents + AGENTS.md)
 \`\`\`
 
 **Manual** (copies the whole folder, including \`references/\` and \`assets/\`):
@@ -86,7 +86,7 @@ ${pairLine(r, catalog)}
 
 \`\`\`bash
 npx ${REPO} install rule ${r.id}             # global (~/.claude/rules)
-npx ${REPO} install rule ${r.id} --project   # this project (./.claude/rules + AGENTS.md)
+npx ${REPO} install rule ${r.id} --project   # this project (./.claude + ./.agents + AGENTS.md)
 \`\`\`
 
 **Manual:**
@@ -96,7 +96,7 @@ mkdir -p ~/.claude/rules
 curl -fsSL ${RAW}/rules/${r.id}.md -o ~/.claude/rules/${r.id}.md
 \`\`\`
 
-**Use it:** Claude Code loads rules from \`.claude/rules\` automatically (check with \`/memory\`). Other agents (Codex, Cursor, Copilot…) find it through the project's \`AGENTS.md\`.
+**Use it:** Claude Code loads rules from \`.claude/rules\` automatically (check with \`/memory\`). In a project it is also copied to \`.agents/rules\`, and other agents (Codex, Cursor, Copilot…) find it through \`AGENTS.md\`.
 
 **Uninstall:** \`npx ${REPO} uninstall rule ${r.id}\` or \`rm ~/.claude/rules/${r.id}.md\`
 

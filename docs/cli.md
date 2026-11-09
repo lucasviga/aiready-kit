@@ -11,12 +11,12 @@ Running `npx github:lucasviga/aiready-kit` with no arguments opens the wizard. Y
 | `install rule <name...>` | Install one or more rules |
 | `install skill <name...>` | Install one or more skills |
 | `uninstall rule\|skill <name...>` | Remove items (`uninstall all` removes everything) |
-| `agents` | Regenerate `./AGENTS.md` from what's in `./.claude` |
+| `agents` | Regenerate `./AGENTS.md` from what's installed in the project |
 | `new rule\|skill <name>` | Scaffold a new item in this repo (from a clone) |
 
 | Flag | Effect |
 |------|--------|
-| `--project` | Use `./.claude` (and update `AGENTS.md` / `CLAUDE.md`) instead of `~/.claude` |
+| `--project` | Use `./.claude` + `./.agents` (and update `AGENTS.md` / `CLAUDE.md`) instead of `~/.claude` |
 | `--link` | Symlink instead of copy (only from a git clone) |
 | `--force` | Overwrite items that are already installed |
 | `--no-agents` | Don't touch `AGENTS.md` / `CLAUDE.md` |
