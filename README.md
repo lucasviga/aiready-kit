@@ -38,15 +38,21 @@ Pick what you want, then choose **This project** or **Global**. That's it.
 | [`agents-md`](docs/catalog.md#agents-md-rule) | Keep AGENTS.md and CLAUDE.md as the project's map |
 | [`folder-structure`](docs/catalog.md#folder-structure-rule) | Standard folder structure for frontend and backend projects |
 
-**Skills** (6): loaded only when the task needs them.
+**Skills** (12): loaded only when the task needs them.
 
 | Name | What it does |
 |------|--------------|
 | [`code-standards`](docs/catalog.md#code-standards-skill) | Apply and review clean code standards |
 | [`conventional-commits`](docs/catalog.md#conventional-commits-skill) | Write git commit messages following the Conventional Commits spec |
+| [`create-prd`](docs/catalog.md#create-prd-skill) | PRD |
+| [`create-tasks`](docs/catalog.md#create-tasks-skill) | Tasks |
+| [`create-techspec`](docs/catalog.md#create-techspec-skill) | TechSpec |
 | [`javascript`](docs/catalog.md#javascript-skill) | Write and review modern JavaScript/TypeScript at the language level |
 | [`node`](docs/catalog.md#node-skill) | Build and review Node.js + TypeScript backends |
 | [`react`](docs/catalog.md#react-skill) | Build and review React + TypeScript frontends |
+| [`run-qa`](docs/catalog.md#run-qa-skill) | QA |
+| [`run-review`](docs/catalog.md#run-review-skill) | Code review |
+| [`run-task`](docs/catalog.md#run-task-skill) | Task |
 | [`tests`](docs/catalog.md#tests-skill) | Write and review automated tests with Vitest and Playwright |
 <!-- CATALOG:END -->
 
@@ -59,6 +65,10 @@ Each name links to its install guide.
 - [Catalog](docs/catalog.md): install guide for each rule and skill
 - [Adding your own](docs/authoring.md): create and publish a new rule or skill
 
+## Credits
+
+The spec-driven development skills (`create-prd`, `create-techspec`, `create-tasks`, `run-task`, `run-qa`, `run-review`) are English translations of [Rodrigo Branas' originals](https://github.com/rodrigobranas/formacao-inteligencia-artificial/tree/main/spec-driven-development/processo), published with the author's permission. They follow the flow **PRD → TechSpec → tasks → implement → QA → review**. Each one has a `SOURCE.md` linking to the original.
+
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE), except the translated skills listed under Credits, which remain the work of their original author.

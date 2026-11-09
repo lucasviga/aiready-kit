@@ -143,6 +143,112 @@ mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/conventional-commits 
 
 </details>
 
+### `create-prd` skill
+
+PRD — Product Requirements Document. Use when the user asks for a PRD or wants to define the requirements and scope of a new feature or product (first step of the PRD → TechSpec → tasks flow). Do not use for technical specifications (create-techspec) or to break requirements down into tasks (create-tasks).
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/create-prd/SKILL.md)
+- [`references/TEMPLATE.md`](../skills/create-prd/references/TEMPLATE.md)
+- [`SOURCE.md`](../skills/create-prd/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill create-prd**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill create-prd             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill create-prd --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/create-prd ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/create-prd` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill create-prd` or `rm -rf ~/.claude/skills/create-prd`
+
+</details>
+
+### `create-tasks` skill
+
+Tasks — breakdown of a feature into implementation tasks based on the existing PRD and TechSpec in `tasks/prd-*/`. Use when the user asks to break a feature down into tasks or plan its execution. Do not use to draft the PRD (create-prd) or the TechSpec (create-techspec).
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/create-tasks/SKILL.md)
+- [`references/TEMPLATE_TASK.md`](../skills/create-tasks/references/TEMPLATE_TASK.md)
+- [`references/TEMPLATE_TASKS.md`](../skills/create-tasks/references/TEMPLATE_TASKS.md)
+- [`SOURCE.md`](../skills/create-tasks/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill create-tasks**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill create-tasks             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill create-tasks --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/create-tasks ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/create-tasks` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill create-tasks` or `rm -rf ~/.claude/skills/create-tasks`
+
+</details>
+
+### `create-techspec` skill
+
+TechSpec — technical specification derived from an existing PRD. Use when the user asks for a TechSpec or the architecture of a feature that already has a PRD in `tasks/prd-*/prd.md`. Do not use without a PRD (create-prd) or to break it down into tasks (create-tasks).
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/create-techspec/SKILL.md)
+- [`references/TEMPLATE.md`](../skills/create-techspec/references/TEMPLATE.md)
+- [`SOURCE.md`](../skills/create-techspec/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill create-techspec**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill create-techspec             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill create-techspec --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/create-techspec ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/create-techspec` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill create-techspec` or `rm -rf ~/.claude/skills/create-techspec`
+
+</details>
+
 ### `javascript` skill
 
 Write and review modern JavaScript/TypeScript at the language level — no var, strict equality, strict typing without any, function declarations for main functions and arrows for callbacks, flat ternaries, and typed parameter/return objects. Use whenever writing or reviewing .js/.ts/.jsx/.tsx code, or setting up tsconfig/lint rules.
@@ -250,6 +356,110 @@ mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/react ~/.claude/skill
 **Use it:** the agent loads it when the task matches the description, or call it with `/react` in Claude Code.
 
 **Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill react` or `rm -rf ~/.claude/skills/react`
+
+</details>
+
+### `run-qa` skill
+
+QA — validate and stabilize an implemented feature against the PRD, the TechSpec and the tasks: unit, integration and E2E tests with the available browser tool, accessibility, responsiveness, fixing the bugs found and a final report with evidence. Use when the user asks to run QA. Do not use to implement new tasks or to review the code (run-review).
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/run-qa/SKILL.md)
+- [`references/TEMPLATE.md`](../skills/run-qa/references/TEMPLATE.md)
+- [`SOURCE.md`](../skills/run-qa/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill run-qa**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill run-qa             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill run-qa --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/run-qa ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/run-qa` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill run-qa` or `rm -rf ~/.claude/skills/run-qa`
+
+</details>
+
+### `run-review` skill
+
+Code review — review and stabilize the code of a feature for compliance with the project rules, adherence to the TechSpec and to the tasks, and tests, with a final report and verdict. Use when the user asks to review code, run a code review, validate compliance with the rules or fix problems found during the review. Do not use to validate behavior in QA (run-qa) or to implement new tasks.
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/run-review/SKILL.md)
+- [`references/TEMPLATE.md`](../skills/run-review/references/TEMPLATE.md)
+- [`SOURCE.md`](../skills/run-review/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill run-review**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill run-review             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill run-review --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/run-review ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/run-review` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill run-review` or `rm -rf ~/.claude/skills/run-review`
+
+</details>
+
+### `run-task` skill
+
+Task — identify and implement the next task of a feature based on the PRD, the TechSpec and the tasks.md, marking it as done at the end. Use when the user asks to run, implement or start a task/subtask, or to continue implementing a feature. Do not use to review (run-review) or validate in QA (run-qa) what has already been implemented.
+
+**Files** (only `SKILL.md` is loaded when the skill triggers; the rest are read on demand):
+
+- [`SKILL.md`](../skills/run-task/SKILL.md)
+- [`SOURCE.md`](../skills/run-task/SOURCE.md)
+
+<details>
+<summary>Install guide</summary>
+
+**Wizard:** run `npx github:lucasviga/aiready-kit` → *Install skills / rules* → select **skill run-task**.
+
+**One command:**
+
+```bash
+npx github:lucasviga/aiready-kit install skill run-task             # global (~/.claude/skills)
+npx github:lucasviga/aiready-kit install skill run-task --project   # this project (./.claude/skills + AGENTS.md)
+```
+
+**Manual** (copies the whole folder, including `references/` and `assets/`):
+
+```bash
+git clone --depth 1 https://github.com/lucasviga/aiready-kit.git /tmp/aiready-kit
+mkdir -p ~/.claude/skills && cp -R /tmp/aiready-kit/skills/run-task ~/.claude/skills/
+```
+
+**Use it:** the agent loads it when the task matches the description, or call it with `/run-task` in Claude Code.
+
+**Uninstall:** `npx github:lucasviga/aiready-kit uninstall skill run-task` or `rm -rf ~/.claude/skills/run-task`
 
 </details>
 
