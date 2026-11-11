@@ -1,9 +1,13 @@
+import os from 'node:os';
 import path from 'node:path';
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
 import { loadAll, pairOf } from './catalog.js';
-import { syncAgentsMd, CLAUDE_HINTS } from './agents.js';
-import { install, uninstall, status, targetBase, canSymlink, scaffold, NAME_RE } from './install.js';
+import { syncAgentsMd, syncGlobalAgentsMd, importHint } from './agents.js';
+import { install, uninstall, status, targetsFor, canSymlink, scaffold, NAME_RE } from './install.js';
+import { HARNESSES, HARNESS_IDS, detectHarnesses } from './harness.js';
+import { successMessage } from './summary.js';
+import { runUpdate } from './update.js';
 
 function bail(value) {
   if (p.isCancel(value)) {
@@ -19,23 +23,49 @@ const badge = (s) =>
   ({ linked: pc.cyan('linked'), installed: pc.green('installed'), conflict: pc.red('conflict') })[s] ||
   pc.dim('not installed');
 
-async function chooseScope() {
+const home = (dir) => dir.replace(os.homedir(), '~');
+const here = (dir) => `./${path.relative(process.cwd(), dir)}`;
+
+function scopeHint(scope, harnesses) {
+  const bases = targetsFor(scope, harnesses).map((t) => t.base);
+  if (scope === 'global') return `${bases.map(home).join(', ')} — every project`;
+  return `${[...bases.map(here), 'AGENTS.md'].join(', ')} — commit them with the repo`;
+}
+
+async function chooseScope(harnesses = HARNESS_IDS) {
   return bail(
     await p.select({
       message: 'Where should it go?',
       options: [
-        { value: 'global', label: 'Global', hint: `${targetBase('global')} — every project` },
-        { value: 'project', label: 'This project', hint: './.claude + ./.agents + AGENTS.md — commit them with the repo' },
+        { value: 'project', label: 'This project', hint: scopeHint('project', harnesses) },
+        { value: 'global', label: 'Global', hint: scopeHint('global', harnesses) },
       ],
+    }),
+  );
+}
+
+/** Lists the AI coding tools found on this machine; the user picks which ones to install for. */
+async function chooseHarnesses() {
+  const found = detectHarnesses();
+  if (!found.length) p.log.warn('No AI coding tool detected on this machine. Pick the ones you use.');
+  const choices = found.length ? found : HARNESSES;
+  return bail(
+    await p.multiselect({
+      message: `${found.length ? `Found ${found.length} AI coding tool(s). ` : ''}Install for which ones? ${pc.dim('(space = toggle, a = all, enter = confirm)')}`,
+      required: true,
+      options: choices.map((h) => ({ value: h.id, label: h.label, hint: pc.dim(h.foundAt || 'not detected') })),
     }),
   );
 }
 
 async function installFlow() {
   const { skills, rules } = loadAll();
-  const scope = await chooseScope();
   const all = [...skills, ...rules];
   if (!all.length) return p.log.warn('The catalog is empty. Create one with "Create new" first.');
+  const harnesses = await chooseHarnesses();
+  const scope = await chooseScope(harnesses);
+  const targets = targetsFor(scope, harnesses);
+  const statusOf = (i) => status(i, scope, { harnesses });
 
   const picked = bail(
     await p.multiselect({
@@ -44,7 +74,7 @@ async function installFlow() {
       options: all.map((i) => ({
         value: i,
         label: `${i.kind === 'skill' ? pc.magenta('skill') : pc.blue('rule ')}  ${i.id}`,
-        hint: `${badge(status(i, scope))} · ${truncate(i.description)}`,
+        hint: `${badge(statusOf(i))} · ${truncate(i.description)}`,
       })),
     }),
   );
@@ -52,7 +82,7 @@ async function installFlow() {
   const catalog = { skills, rules };
   const missingPairs = picked
     .map((i) => pairOf(i, catalog))
-    .filter((pair) => pair && !picked.includes(pair) && status(pair, scope) === 'missing');
+    .filter((pair) => pair && !picked.includes(pair) && statusOf(pair) === 'missing');
   if (missingPairs.length) {
     const addPairs = bail(
       await p.confirm({
@@ -76,7 +106,7 @@ async function installFlow() {
     );
   }
 
-  const existing = picked.filter((i) => status(i, scope) !== 'missing');
+  const existing = picked.filter((i) => statusOf(i) !== 'missing');
   let force = false;
   if (existing.length) {
     force = bail(
@@ -87,16 +117,38 @@ async function installFlow() {
     );
   }
 
-  const results = picked.map((item) => install(item, { scope, mode, force }));
+  const results = picked.map((item) => install(item, { targets, mode, force }));
   report(results);
-  if (scope === 'project') reportAgents(syncAgentsMd());
+  syncAgentFiles(scope, harnesses);
+  const message = successMessage(results, harnesses);
+  if (message) p.log.success(pc.green(pc.bold(message)));
+  else p.log.warn('Nothing new was installed.');
+}
+
+function syncAgentFiles(scope, harnesses) {
+  if (scope === 'project') return reportAgents(syncAgentsMd({ harnesses }));
+  syncGlobalAgentsMd(harnesses).forEach(reportAgents);
+}
+
+async function menuOrExit() {
+  const next = bail(
+    await p.select({
+      message: 'What next?',
+      options: [
+        { value: 'menu', label: 'Back to menu' },
+        { value: 'exit', label: 'Exit' },
+      ],
+    }),
+  );
+  return next === 'exit';
 }
 
 async function uninstallFlow() {
   const { skills, rules } = loadAll();
   const scope = await chooseScope();
+  const targets = targetsFor(scope);
   const installed = [...skills, ...rules].filter((i) => status(i, scope) !== 'missing');
-  if (!installed.length) return p.log.info(`Nothing from this kit is installed in ${targetBase(scope)}.`);
+  if (!installed.length) return p.log.info(`Nothing from this kit is installed ${scope === 'global' ? 'globally' : 'in this project'}.`);
 
   const picked = bail(
     await p.multiselect({
@@ -107,8 +159,8 @@ async function uninstallFlow() {
   );
   const ok = bail(await p.confirm({ message: `Remove ${picked.length} item(s)?`, initialValue: false }));
   if (!ok) return p.log.info('Nothing removed.');
-  report(picked.map((item) => uninstall(item, { scope })));
-  if (scope === 'project') reportAgents(syncAgentsMd());
+  report(picked.map((item) => uninstall(item, { targets })));
+  syncAgentFiles(scope, HARNESS_IDS);
 }
 
 function statusFlow() {
@@ -158,13 +210,17 @@ async function createFlow() {
   }
 }
 
-function reportAgents({ file, result, claude }) {
+function reportAgents({ file, result, imports = [] }) {
   if (result !== 'unchanged') p.log.info(`AGENTS.md ${result} ${pc.dim(file)} — rules and skills are linked for any AI agent.`);
-  if (CLAUDE_HINTS[claude]) p.log.info(CLAUDE_HINTS[claude]);
+  imports.map(importHint).filter(Boolean).forEach((hint) => p.log.info(hint));
 }
 
 function report(results) {
   for (const r of results) {
+    if (!r.dest) {
+      p.log.warn(`${r.item.kind} ${pc.bold(r.item.id)} (${r.reason})`);
+      continue;
+    }
     const extra = r.dests?.length > 1 ? pc.dim(` (+ ${r.dests.slice(1).map((d) => path.relative(process.cwd(), d)).join(', ')})`) : '';
     const line = `${r.item.kind} ${pc.bold(r.item.id)} → ${pc.dim(r.dest)}${extra}`;
     if (r.result === 'skipped' || r.result === 'not installed') p.log.warn(`${line} (${r.reason || r.result})`);
@@ -183,6 +239,7 @@ export async function runWizard() {
         options: [
           { value: 'install', label: 'Install skills / rules' },
           { value: 'status', label: 'Show status' },
+          { value: 'update', label: 'Update to the latest version', hint: 'fetch the newest kit and refresh what is installed' },
           { value: 'uninstall', label: 'Uninstall' },
           { value: 'create', label: 'Create new skill / rule', hint: 'scaffold inside this repo' },
           { value: 'exit', label: 'Exit' },
@@ -190,11 +247,18 @@ export async function runWizard() {
       }),
     );
     if (action === 'exit') break;
-    if (action === 'install') await installFlow();
+    if (action === 'install') {
+      await installFlow();
+      if (await menuOrExit()) break;
+    }
+    if (action === 'update') {
+      runUpdate();
+      if (await menuOrExit()) break;
+    }
     if (action === 'status') statusFlow();
     if (action === 'uninstall') await uninstallFlow();
     if (action === 'create') await createFlow();
   }
 
-  p.outro(`Restart Claude Code (or open a new session) to pick up changes. ${pc.dim('Bye!')}`);
+  p.outro(`Restart your AI coding tools (or open a new session) to pick up changes. ${pc.dim('Bye!')}`);
 }

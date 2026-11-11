@@ -12,14 +12,18 @@ Running `npx github:lucasviga/aiready-kit` with no arguments opens the wizard. Y
 | `install skill <name...>` | Install one or more skills |
 | `uninstall rule\|skill <name...>` | Remove items (`uninstall all` removes everything) |
 | `agents` | Regenerate `./AGENTS.md` from what's installed in the project |
+| `detect` | Show the AI coding tools found on this machine |
+| `update` | Fetch the latest aiready-kit (`git pull` in a clone, otherwise `npx` from GitHub) and refresh every installed item, globally and in the current project |
 | `new rule\|skill <name>` | Scaffold a new item in this repo (from a clone) |
 
 | Flag | Effect |
 |------|--------|
-| `--project` | Use `./.claude` + `./.agents` (and update `AGENTS.md` / `CLAUDE.md`) instead of `~/.claude` |
+| `--project` | Install into this project (`./.agents` + `AGENTS.md`, plus `./.claude`, `./.cursor`…) instead of your home folder |
+| `--harness=<ids>` | Tools to install for, comma-separated: `claude`, `cursor`, `codex`, `copilot`, `gemini`. Default: the ones detected on this machine (uninstall defaults to all) |
 | `--link` | Symlink instead of copy (only from a git clone) |
 | `--force` | Overwrite items that are already installed |
-| `--no-agents` | Don't touch `AGENTS.md` / `CLAUDE.md` |
+| `--skip-fetch` | With `update`: refresh from the local copy without fetching |
+| `--no-agents` | Don't touch `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` or `~/.codex/AGENTS.md` |
 
 ## Examples
 
@@ -27,7 +31,9 @@ Running `npx github:lucasviga/aiready-kit` with no arguments opens the wizard. Y
 npx github:lucasviga/aiready-kit install all --project
 npx github:lucasviga/aiready-kit install rule folder-structure --project
 npx github:lucasviga/aiready-kit install skill react node tests
+npx github:lucasviga/aiready-kit install all --project --harness=claude,cursor
 npx github:lucasviga/aiready-kit uninstall skill tests
+npx github:lucasviga/aiready-kit update
 ```
 
 ## Working from a clone

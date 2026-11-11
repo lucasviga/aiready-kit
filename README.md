@@ -2,7 +2,7 @@
 
 My personal **rules and skills for AI coding agents**, with a terminal wizard to install them.
 
-Works with [Claude Code](https://claude.com/claude-code) and any agent that reads `AGENTS.md` (Codex, Cursor, Copilot…).
+Works with [Claude Code](https://claude.com/claude-code), Cursor, Codex, GitHub Copilot CLI, Gemini CLI and any agent that reads `AGENTS.md`. The wizard detects which of them are installed on your machine and installs for those.
 
 ## Install
 
@@ -24,7 +24,17 @@ npx github:lucasviga/aiready-kit
 └
 ```
 
-Pick what you want, then choose **This project** (`.claude/` + `.agents/` + `AGENTS.md`) or **Global** (`~/.claude/`). That's it.
+Choose **Install**: the wizard lists the AI coding tools it found on your machine and you pick which ones to install for, then it asks **This project** or **Global**, then what to install. It prints a success message and lets you go **Back to menu** or **Exit**. See [where files go](docs/how-it-works.md#where-files-go).
+
+## Update
+
+Get the latest rules and skills and refresh everything you already installed (globally and in the current project):
+
+```bash
+npx github:lucasviga/aiready-kit update
+```
+
+Or pick **Update to the latest version** in the wizard. Only items that are already installed are rewritten, in the same folders; nothing new is added.
 
 ## What's inside
 

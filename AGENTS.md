@@ -1,13 +1,13 @@
 # AGENTS.md
 
-aiready-kit — a terminal wizard and CLI that installs Claude Code rules and skills globally or into a project.
+aiready-kit — a terminal wizard and CLI that detects the AI coding tools on your machine (Claude Code, Cursor, Codex, Copilot CLI, Gemini CLI) and installs rules and skills for them, globally or into a project.
 
 ## Project map
 
 | Path | What it holds |
 |------|---------------|
-| `bin/cli.js` | CLI entry point (`aiready-kit` bin): wizard, list, install, uninstall, new, agents |
-| `src/` | `catalog.js` (loads rules/skills + frontmatter), `install.js` (copy/symlink to `.claude/` + `.agents/`), `agents.js` (AGENTS.md managed block), `wizard.js` (interactive prompts) |
+| `bin/cli.js` | CLI entry point (`aiready-kit` bin): wizard, list, install, uninstall, update, new, agents, detect |
+| `src/` | `catalog.js` (loads rules/skills + frontmatter), `harness.js` (supported tools, detection, target folders), `install.js` (copy/symlink into each tool's folder; Cursor rules as `.mdc`), `agents.js` (AGENTS.md managed block, CLAUDE.md/GEMINI.md imports, `~/.codex/AGENTS.md`), `summary.js` (success message), `update.js` (fetch the latest kit and refresh installed items), `wizard.js` (interactive prompts) |
 | `rules/` | Source rules (`*.md` with frontmatter) — the catalog |
 | `skills/` | Source skills (`<name>/SKILL.md` + `references/` + `assets/`) — the catalog |
 | `templates/` | Scaffolds used by `aiready-kit new` |
@@ -36,6 +36,7 @@ npm ci
 ```bash
 npm start                 # wizard (needs a TTY)
 node bin/cli.js list      # list rules and skills
+node bin/cli.js detect    # AI coding tools found on this machine
 node bin/cli.js -h        # help
 ```
 

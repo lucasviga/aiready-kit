@@ -9,7 +9,7 @@
 | **What** | One short Markdown file with must-follow rules | A folder: `SKILL.md` + `references/` + `assets/` |
 | **When it loads** | Every session (or only for matching files, with `paths:`) | Only when the task matches the skill's `description` |
 | **Use it for** | Things that must always hold (project map, folder layout) | Detailed how-to: examples, configs, best practices |
-| **Installed to** | `.claude/rules/<name>.md` (+ `.agents/rules/` in projects) | `.claude/skills/<name>/` (+ `.agents/skills/` in projects) |
+| **Installed to** | `rules/<name>.md` in each tool's folder (`.mdc` for Cursor) | `skills/<name>/` in each tool's folder |
 
 ## Lazy loading
 
@@ -28,13 +28,34 @@ skills/react/
 2. **`SKILL.md`**: loaded when the skill triggers. It ends with a *"When you need… → Read"* table.
 3. **Resources**: opened one file at a time, only when needed.
 
-## Global vs. project
+## Detected tools
 
-| | Global | This project |
-|---|---|---|
-| Goes to | `~/.claude/` | `./.claude/` **and** `./.agents/` |
-| Applies to | Every project on your machine (Claude Code) | This repository, for everyone who clones it |
-| Touches `AGENTS.md` / `CLAUDE.md` | No | Yes (see below) |
+The wizard looks for each tool's home folder, its binary on `PATH` or its macOS app, lists the tools it finds, and you pick which ones to install for (if none is found, it lists every supported tool). `install` on the command line uses `--harness=<ids>`, or every detected tool when the flag is absent. Run `aiready-kit detect` to see them.
+
+| Tool | Detected by |
+|------|-------------|
+| Claude Code | `~/.claude`, `claude` |
+| Cursor | `~/.cursor`, `cursor` / `cursor-agent`, `Cursor.app` |
+| Codex | `~/.codex`, `codex`, `Codex.app` |
+| GitHub Copilot CLI | `~/.copilot`, `copilot` |
+| Gemini CLI | `~/.gemini`, `gemini` |
+
+## Where files go
+
+| Tool | This project | Global |
+|------|--------------|--------|
+| *(always, project only)* | `./.agents/` + `AGENTS.md` | — |
+| Claude Code | `./.claude/` + `CLAUDE.md` (`@AGENTS.md`) | `~/.claude/` (rules + skills) |
+| Cursor | `./.cursor/rules/*.mdc` + `./.cursor/skills/` | `~/.cursor/skills/` (Cursor keeps global rules in its settings) |
+| Codex | `./.agents/` + `AGENTS.md` | `~/.agents/` + a block in `~/.codex/AGENTS.md` |
+| GitHub Copilot CLI | `./.agents/` + `AGENTS.md` | `~/.copilot/skills/` |
+| Gemini CLI | `./.agents/` + `AGENTS.md` + `GEMINI.md` (`@AGENTS.md`) | `~/.gemini/skills/` |
+
+A rule is skipped for a global tool that has no rules folder. Uninstall removes items from every tool's folder, detected or not.
+
+## Updating
+
+`aiready-kit update` fetches the newest kit, then re-runs itself with the new code and rewrites every installed copy whose content changed, in the folders where it is already installed. Symlinked items already point at the kit and are left alone. `AGENTS.md` blocks are regenerated.
 
 ## Why both `.claude/` and `.agents/`
 
@@ -43,7 +64,7 @@ skills/react/
 | `.claude/` | Claude Code, which loads `.claude/rules` and `.claude/skills` automatically |
 | `.agents/` | `AGENTS.md`-based workflows, such as the spec-driven skills (`create-techspec`, `run-task`, `run-qa`, `run-review`), which read `.agents/rules/` and `.agents/skills/` |
 
-A project install writes the same files to both, so every tool sees the same rules. Uninstall removes both. Commit both folders.
+A project install always writes `.agents/`, plus `.claude/` when Claude Code is selected, so every tool sees the same rules. Uninstall removes both. Commit both folders.
 
 ## AGENTS.md and CLAUDE.md
 
@@ -61,5 +82,5 @@ On a project install, the kit keeps a generated block in `./AGENTS.md` that link
 ```
 
 - Anything you write outside the markers is kept. The `agents-md` rule asks the agent to maintain the project map, stack, ports and the install/run/test/build commands there.
-- If there is no `CLAUDE.md`, the kit creates one containing `@AGENTS.md`, so Claude Code reads the same file. It never edits a `CLAUDE.md` you wrote; it only shows a tip.
+- If Claude Code (or Gemini CLI) is selected and there is no `CLAUDE.md` (or `GEMINI.md`), the kit creates one containing `@AGENTS.md`, so it reads the same file. It never edits one you wrote; it only shows a tip.
 - Uninstalling everything removes the block, and removes the files too if the kit created them.
